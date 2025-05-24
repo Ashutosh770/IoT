@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchLatestData } from '../services/api';
 
 const CustomGauge = ({ value, maxValue, color, unit, label }) => {
@@ -82,59 +83,61 @@ export default function DashboardScreen({ navigation }) {
   console.log('Current sensor data:', sensorData);
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>IoT Dashboard</Text>
-      
-      {loading ? (
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={styles.loadingText}>Connecting to server...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.centerContent}>
-          <Text style={styles.errorText}>{error}</Text>
-          <Text style={styles.helpText}>Server: 192.168.2.71:3000</Text>
-          <Text style={styles.helpText}>Device ID: ESP32_D15</Text>
-          <Button title="Retry" onPress={() => setLoading(true)} />
-        </View>
-      ) : sensorData ? (
-        <View style={styles.dataContainer}>
-          <Text style={styles.deviceId}>Device: {sensorData.deviceId || 'ESP32_D15'}</Text>
-          
-          <View style={styles.gaugesContainer}>
-            <CustomGauge
-              value={sensorData.temperature}
-              maxValue={50}
-              color="#FF5252"
-              unit="°C"
-              label="Temperature"
-            />
-            <CustomGauge
-              value={sensorData.humidity}
-              maxValue={100}
-              color="#4CAF50"
-              unit="%"
-              label="Humidity"
-            />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Text style={styles.title}>IoT Dashboard</Text>
+        
+        {loading ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color="#0000ff" />
+            <Text style={styles.loadingText}>Connecting to server...</Text>
           </View>
-          
-          {sensorData.timestamp && (
-            <View style={styles.timestampContainer}>
-              <Text style={styles.timestampLabel}>Last Updated:</Text>
-              <Text style={styles.timestamp}>{new Date(sensorData.timestamp).toLocaleString()}</Text>
+        ) : error ? (
+          <View style={styles.centerContent}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Text style={styles.helpText}>Server: 192.168.2.71:3000</Text>
+            <Text style={styles.helpText}>Device ID: ESP32_D15</Text>
+            <Button title="Retry" onPress={() => setLoading(true)} />
+          </View>
+        ) : sensorData ? (
+          <View style={styles.dataContainer}>
+            <Text style={styles.deviceId}>Device: {sensorData.deviceId || 'ESP32_D15'}</Text>
+            
+            <View style={styles.gaugesContainer}>
+              <CustomGauge
+                value={sensorData.temperature}
+                maxValue={50}
+                color="#FF5252"
+                unit="°C"
+                label="Temperature"
+              />
+              <CustomGauge
+                value={sensorData.humidity}
+                maxValue={100}
+                color="#4CAF50"
+                unit="%"
+                label="Humidity"
+              />
             </View>
-          )}
-        </View>
-      ) : (
-        <Text>No data available</Text>
-      )}
-      
-      <Button
-        title="View History"
-        onPress={() => navigation.navigate('History')}
-        style={styles.historyButton}
-      />
-    </ScrollView>
+            
+            {sensorData.timestamp && (
+              <View style={styles.timestampContainer}>
+                <Text style={styles.timestampLabel}>Last Updated:</Text>
+                <Text style={styles.timestamp}>{new Date(sensorData.timestamp).toLocaleString()}</Text>
+              </View>
+            )}
+          </View>
+        ) : (
+          <Text>No data available</Text>
+        )}
+        
+        <Button
+          title="View History"
+          onPress={() => navigation.navigate('History')}
+          style={styles.historyButton}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

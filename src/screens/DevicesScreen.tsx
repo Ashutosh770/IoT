@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Switch } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Define types for device objects
 interface Device {
@@ -47,24 +48,27 @@ const DeviceCard: React.FC<{ device: Device }> = ({ device }) => {
 
 export default function DevicesScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, styles.container]}>
       <Text style={styles.title}>Your Devices</Text>
       <FlatList
         data={mockDevices}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <DeviceCard device={item} />}
-        style={styles.list}
+        contentContainerStyle={styles.listContent}
       />
       <TouchableOpacity style={styles.addButton} onPress={() => console.log('Add device')}>
         <Text style={styles.addButtonText}>+ Add Device</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  container: {
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
@@ -74,8 +78,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
   },
-  list: {
-    flex: 1,
+  listContent: {
+    padding: 16,
   },
   card: {
     backgroundColor: '#fff',
@@ -121,4 +125,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

@@ -1,30 +1,36 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>IoT Control Center</Text>
-      <Text style={styles.description}>
-        Monitor and control your IoT devices from anywhere
-      </Text>
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => console.log('Add device')}
-      >
-        <Text style={styles.buttonText}>Add a Device</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>IoT Control Center</Text>
+        <Text style={styles.description}>
+          Monitor and control your IoT devices from anywhere
+        </Text>
+        <TouchableOpacity 
+          style={styles.button}
+          onPress={() => navigation.replace('MainTabs')}
+        >
+          <Text style={styles.buttonText}>Add a Device</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  container: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
@@ -49,4 +55,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});

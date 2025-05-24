@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, Switch, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Switch, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
@@ -23,55 +24,61 @@ export default function SettingsScreen() {
   };
   
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      
-      <View style={styles.settingSection}>
-        <Text style={styles.sectionTitle}>App Preferences</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Settings</Text>
         
-        <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Notifications</Text>
-          <Switch
-            value={notificationsEnabled}
-            onValueChange={setNotificationsEnabled}
-          />
+        <View style={styles.settingSection}>
+          <Text style={styles.sectionTitle}>App Preferences</Text>
+          
+          <View style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Notifications</Text>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+            />
+          </View>
+          
+          <View style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Dark Mode</Text>
+            <Switch
+              value={darkModeEnabled}
+              onValueChange={setDarkModeEnabled}
+            />
+          </View>
         </View>
         
-        <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>Dark Mode</Text>
-          <Switch
-            value={darkModeEnabled}
-            onValueChange={setDarkModeEnabled}
-          />
+        <View style={styles.settingSection}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          
+          <TouchableOpacity style={styles.button} onPress={() => console.log('Edit Profile')}>
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.button, styles.logoutButton]} 
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-      
-      <View style={styles.settingSection}>
-        <Text style={styles.sectionTitle}>Account</Text>
         
-        <TouchableOpacity style={styles.button} onPress={() => console.log('Edit Profile')}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.button, styles.logoutButton]} 
-          onPress={handleLogout}
-        >
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.footer}>
-        <Text style={styles.version}>App Version 1.0.0</Text>
-        <Text style={styles.copyright}>© 2023 IoT Control App</Text>
-      </View>
-    </View>
+        <View style={styles.footer}>
+          <Text style={styles.version}>App Version 1.0.0</Text>
+          <Text style={styles.copyright}> 2023 IoT Control App</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  container: {
+    flexGrow: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
   },

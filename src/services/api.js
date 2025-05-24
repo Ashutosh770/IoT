@@ -1,7 +1,12 @@
 import axios from 'axios';
 
-// Match the ESP32's server URL
-const API_URL = `${process.env.EXPO_PUBLIC_API_URL}/api`;
+// Use environment variable with fallback
+const API_URL = process.env.EXPO_PUBLIC_API_URL 
+  ? `${process.env.EXPO_PUBLIC_API_URL}/api`
+  : 'https://iot-backend-dj8u.onrender.com/api';
+
+// Log the API URL for debugging
+console.log('Using API URL:', API_URL);
 
 export const fetchLatestData = async () => {
   try {
@@ -9,15 +14,16 @@ export const fetchLatestData = async () => {
     const response = await axios.get(`${API_URL}/data/latest`);
     console.log('Received data:', response.data);
     
-    // Ensure the response has the correct structure
+    // Handle MongoDB data structure
     if (response.data && typeof response.data === 'object') {
+      const data = response.data;
       return {
         success: true,
         data: {
-          temperature: parseFloat(response.data.temperature) || 0,
-          humidity: parseFloat(response.data.humidity) || 0,
-          deviceId: response.data.deviceId || 'ESP32_D15',
-          timestamp: response.data.timestamp || new Date().toISOString()
+          temperature: parseFloat(data.temperature) || 0,
+          humidity: parseFloat(data.humidity) || 0,
+          deviceId: data.deviceId || 'ESP32_001',
+          timestamp: data.timestamp?.$date || new Date().toISOString()
         }
       };
     }
@@ -29,8 +35,7 @@ export const fetchLatestData = async () => {
       console.error("Response data:", error.response.data);
     } else if (error.request) {
       console.error("No response received. Is the server running?");
-      console.error("Make sure your backend server is running on port 3000");
-      console.error("And that you're connected to the same network as the ESP32");
+      console.error("Make sure your backend server is running");
     }
     return { success: false, data: null };
   }
@@ -38,13 +43,18 @@ export const fetchLatestData = async () => {
 
 export const fetchHistoryData = async () => {
   try {
-    console.log('Fetching history from:', `${API_URL}/data`);
-    const response = await axios.get(`${API_URL}/data`);
+    console.log('Fetching history from:', `${API_URL}/data/history`);
+    const response = await axios.get(`${API_URL}/data/history`);
     console.log('Received history:', response.data);
     
-    // Check if response has data array
-    if (response.data && response.data.success && Array.isArray(response.data.data)) {
-      return response.data.data;
+    // Handle MongoDB data structure
+    if (response.data && Array.isArray(response.data)) {
+      return response.data.map(item => ({
+        temperature: parseFloat(item.temperature) || 0,
+        humidity: parseFloat(item.humidity) || 0,
+        deviceId: item.deviceId || 'ESP32_001',
+        timestamp: item.timestamp?.$date || new Date().toISOString()
+      }));
     }
     return [];
   } catch (error) {
@@ -54,8 +64,7 @@ export const fetchHistoryData = async () => {
       console.error("Response data:", error.response.data);
     } else if (error.request) {
       console.error("No response received. Is the server running?");
-      console.error("Make sure your backend server is running on port 3000");
-      console.error("And that you're connected to the same network as the ESP32");
+      console.error("Make sure your backend server is running");
     }
     return [];
   }

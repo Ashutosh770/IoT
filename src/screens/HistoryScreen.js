@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchHistoryData } from '../services/api';
 
 export default function HistoryScreen() {
@@ -50,39 +51,44 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sensor History</Text>
-      
-      {loading ? (
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={styles.loadingText}>Loading history...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.centerContent}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : historyData.length > 0 ? (
-        <FlatList
-          data={historyData}
-          renderItem={renderItem}
-          keyExtractor={item => item._id}
-          contentContainerStyle={styles.listContainer}
-        />
-      ) : (
-        <View style={styles.centerContent}>
-          <Text>No history data available</Text>
-        </View>
-      )}
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Sensor History</Text>
+        
+        {loading ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color="#0000ff" />
+            <Text style={styles.loadingText}>Loading history...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.centerContent}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : historyData.length > 0 ? (
+          <FlatList
+            data={historyData}
+            renderItem={renderItem}
+            keyExtractor={item => item._id}
+            contentContainerStyle={styles.listContainer}
+          />
+        ) : (
+          <View style={styles.centerContent}>
+            <Text>No history data available</Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+  },
+  container: {
+    flexGrow: 1,
+    padding: 16,
   },
   title: {
     fontSize: 24,
