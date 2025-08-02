@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, G, Text as SvgText } from 'react-native-svg';
-import { LineChart } from 'react-native-chart-kit';
 import { fetchLatestData, fetchHistoryData } from '../services/api';
 
 // Get screen dimensions
@@ -159,160 +158,6 @@ const TemperatureDial = ({ temperature }: { temperature: number }) => {
   );
 };
 
-// History Graph Component
-const HistoryGraph = ({ historyData }: { historyData: any[] }) => {
-  const [currentData, setCurrentData] = useState<any[]>([]);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  
-  // Process data for chart
-  const processChartData = () => {
-    if (!currentData || currentData.length === 0) {
-      return {
-        labels: ['No Data'],
-        datasets: [
-          {
-            data: [0],
-            color: () => '#ff6b6b',
-            strokeWidth: 2
-          },
-          {
-            data: [0],
-            color: () => '#4dabf7',
-            strokeWidth: 2
-          }
-        ],
-        legend: ['Temperature', 'Humidity']
-      };
-    }
-
-    // Format timestamps for labels (HH:MM:SS format)
-    const labels = currentData.map(item => {
-      const date = new Date(item.timestamp);
-      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
-    });
-    
-    // Extract temperature and humidity values
-    const temperatureData = currentData.map(item => parseFloat(item.temperature) || 0);
-    const humidityData = currentData.map(item => parseFloat(item.humidity) || 0);
-    
-    return {
-      labels,
-      datasets: [
-        {
-          data: temperatureData,
-          color: () => '#ff6b6b', // red
-          strokeWidth: 2
-        },
-        {
-          data: humidityData,
-          color: () => '#4dabf7', // blue
-          strokeWidth: 2
-        }
-      ],
-      legend: ['Temperature', 'Humidity']
-    };
-  };
-
-  // Update data every second
-  useEffect(() => {
-    const updateInterval = setInterval(() => {
-      setCurrentTime(new Date());
-      
-      // Get the last 30 seconds of data
-      const thirtySecondsAgo = new Date(currentTime.getTime() - 30000);
-      
-      // Filter and sort data
-      const recentData = historyData
-        .filter(item => new Date(item.timestamp) >= thirtySecondsAgo)
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      
-      // Only update if we have new data
-      if (recentData.length > 0) {
-        setCurrentData(recentData);
-      }
-    }, 1000); // Update every second
-
-    return () => clearInterval(updateInterval);
-  }, [historyData, currentTime]);
-
-  const chartData = processChartData();
-  
-  const chartConfig = {
-    backgroundColor: '#ffffff',
-    backgroundGradientFrom: '#ffffff',
-    backgroundGradientTo: '#ffffff',
-    decimalPlaces: 1,
-    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-    style: {
-      borderRadius: 16
-    },
-    propsForDots: {
-      r: '2',
-      strokeWidth: '1',
-    },
-    // Add animation configuration
-    animation: {
-      duration: 1000,
-      easing: 'easeInOutQuart'
-    }
-  };
-
-  return (
-    <View style={styles.graphContainer}>
-      <Text style={styles.graphTitle}>Real-time Monitoring</Text>
-      {currentData && currentData.length > 0 ? (
-        <LineChart
-          data={chartData}
-          width={width - 40}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chart}
-          withInnerLines={true}
-          withOuterLines={true}
-          withShadow={false}
-          fromZero={false}
-          yAxisSuffix="°"
-          yAxisInterval={1}
-          segments={5}
-          renderDotContent={({ x, y, index, indexData }) => {
-            // Only show dots for every 5th point to avoid overcrowding
-            if (index % 5 !== 0) return null;
-            return (
-              <SvgText
-                key={`dot-${index}`}
-                x={x}
-                y={y - 10}
-                fill="#333"
-                fontSize="10"
-                fontWeight="bold"
-                textAnchor="middle"
-              >
-                {indexData.toFixed(1)}
-              </SvgText>
-            );
-          }}
-        />
-      ) : (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>No data available</Text>
-        </View>
-      )}
-      <View style={styles.legendContainer}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#ff6b6b' }]} />
-          <Text style={styles.legendText}>Temperature (°C)</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: '#4dabf7' }]} />
-          <Text style={styles.legendText}>Humidity (%)</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
-
 // Hamburger Icon Component
 const HamburgerIcon = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity style={styles.hamburgerButton} onPress={onPress}>
@@ -327,12 +172,11 @@ type WidgetConfig = {
   id: string;
   title: string;
   enabled: boolean;
-  component: 'gauge' | 'cards' | 'bars' | 'graph';
+  component: 'gauge' | 'cards' | 'bars';
 };
 
 const SensorDetailScreen = ({ navigation }: any) => {
   const [sensorData, setSensorData] = useState<any>(null);
-  const [historyData, setHistoryData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -343,7 +187,6 @@ const SensorDetailScreen = ({ navigation }: any) => {
     { id: '1', title: 'Temperature Gauge', enabled: true, component: 'gauge' },
     { id: '2', title: 'Temperature & Humidity Cards', enabled: true, component: 'cards' },
     { id: '3', title: 'Data Visualization Bars', enabled: true, component: 'bars' },
-    { id: '4', title: 'History Graph', enabled: true, component: 'graph' },
   ]);
 
   // Animation value for menu
@@ -420,7 +263,7 @@ const SensorDetailScreen = ({ navigation }: any) => {
   };
 
   // Check if a component should be shown
-  const shouldShowComponent = (component: 'gauge' | 'cards' | 'bars' | 'graph') => {
+  const shouldShowComponent = (component: 'gauge' | 'cards' | 'bars') => {
     return widgets.some(widget => widget.component === component && widget.enabled);
   };
 
@@ -490,11 +333,6 @@ const SensorDetailScreen = ({ navigation }: any) => {
                 label="Humidity (%)" 
               />
             </View>
-          )}
-          
-          {/* History Graph */}
-          {!loading && shouldShowComponent('graph') && (
-            <HistoryGraph historyData={historyData} />
           )}
           
           <View style={styles.historyHeader}>
@@ -653,43 +491,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Graph styles
-  graphContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  graphTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#4b5563',
-  },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 12,
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 10,
-  },
-  legendColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 6,
-  },
-  legendText: {
-    fontSize: 12,
-    color: '#4b5563',
-  },
   // Hamburger menu styles
   hamburgerButton: {
     width: 24,
@@ -780,15 +581,6 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
-  },
-  noDataContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noDataText: {
-    color: '#bbb',
     fontSize: 16,
   },
 });

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "IoTApp",
-    "slug": "IoTApp",
+    "name": "IoT",
+    "slug": "IoT",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,15 +20,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ashutosh770.IoTApp"
+      "package": "com.ashutosh770.IoTApp",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "55ae5c8d-240f-4ff7-9346-1e9cd2cd62e6"
+        "projectId": "64ea2a88-7bab-4af5-bfc4-d4eacf37e73d"
       }
-    }
+    },
+    "owner": "ashutosh770"
   }
 }
